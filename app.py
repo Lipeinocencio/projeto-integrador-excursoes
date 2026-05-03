@@ -19,7 +19,7 @@ def inicializar_banco():
         data TEXT NOT NULL,
         vagas_totais INTEGER,
         preco REAL,
-        image TEXT
+        imagem TEXT
     )
     ''')
 
