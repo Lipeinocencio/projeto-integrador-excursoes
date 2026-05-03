@@ -76,6 +76,16 @@ def index():
     conn.close()
     return render_template('index.html', lista=viagens)
 
+# --- ROTA DA VITRINE PREMIUM DO SITE ---
+@app.route('/site')
+def site_oficial():
+    conn = sqlite3.connect('excursoes.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM viagens")
+    viagens = cursor.fetchall()
+    conn.close()
+    return render_template('site.html', lista=viagens)
+
 
 @app.route('/cadastrar', methods=['POST'])
 def cadastrar():
