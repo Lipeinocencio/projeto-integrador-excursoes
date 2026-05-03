@@ -83,15 +83,26 @@ def cadastrar():
     data = request.form.get('data')
     vagas = request.form.get('vagas')
     preco = request.form.get('preco')
+    imagem_nome = None
+
+    # Verifica se a requisição tem a parte do arquivo
+    if 'imagem' in request.files:
+        arquivo = request.files['imagem']
+        if arquivo.filename != '':
+            # Limpa o nome do arquivo para segurança
+            imagem_nome = secure_filename(arquivo.filename)
+            # Salva o arquivo na pasta configurada
+            caminho_completo = os.path.join(app.config['UPLOAD_FOLDER'], imagem_nome)
+            arquivo.save(caminho_completo)
 
     conn = sqlite3.connect('excursoes.db')
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO viagens (destino, data, vagas_totais, preco) VALUES (?, ?, ?, ?)",
-                   (destino, data, vagas, preco))
+    # Adicionamos a imagem no INSERT
+    cursor.execute("INSERT INTO viagens (destino, data, vagas_totais, preco, imagem) VALUES (?, ?, ?, ?, ?)",
+                   (destino, data, vagas, preco, imagem_nome))
     conn.commit()
     conn.close()
     return redirect('/')
-
 
 # --- 3. ROTAS DE CLIENTE (CADASTRO E LOGIN) ---
 
