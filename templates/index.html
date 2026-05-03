@@ -8,14 +8,13 @@
     <style>
         body { background-color: #f8f9fa; }
         .sidebar { background-color: #1c2833; min-height: 100vh; color: white; padding-top: 20px; }
-        .sidebar a { color: #adb5bd; text-decoration: none; padding: 15px 20px; display: block; font-weight: bold; border-radius: 0; transition: 0.3s; }
+        .sidebar a { color: #adb5bd; text-decoration: none; padding: 15px 20px; display: block; font-weight: bold; transition: 0.3s; }
         .sidebar a:hover, .sidebar a.active { background-color: #2980b9; color: white; border-left: 4px solid #fff; }
         .card { border: none; box-shadow: 0 4px 8px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        .header-title { padding: 20px 0; border-bottom: 1px solid #dee2e6; margin-bottom: 30px; }
-        .btn-primary { background-color: #2980b9; border: none; }
-        .btn-primary:hover { background-color: #1f6391; }
         .section-separator { border-top: 1px dashed #ccc; margin: 25px 0; }
         .form-section-title { font-size: 0.95rem; font-weight: bold; color: #495057; text-transform: uppercase; margin-bottom: 15px; }
+        .btn-primary { background-color: #2980b9; border: none; }
+        .btn-primary:hover { background-color: #1f6391; }
     </style>
 </head>
 <body>
@@ -25,7 +24,7 @@
         <!-- MENU LATERAL -->
         <div class="col-md-2 sidebar p-0">
             <h4 class="text-center mb-4 text-white">PI Excursões</h4>
-            <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+            <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist">
                 <a class="nav-link active" id="tab-dashboard-list" data-bs-toggle="pill" href="#pane-dashboard">Excursões Ativas</a>
                 <a class="nav-link" id="tab-nova-viagem" data-bs-toggle="pill" href="#pane-nova-viagem">Adicionar Viagem</a>
                 <a class="nav-link" id="tab-config-site" data-bs-toggle="pill" href="#pane-config-site">Configurar Site</a>
@@ -38,9 +37,9 @@
         <div class="col-md-10 p-5">
             <div class="tab-content" id="v-pills-tabContent">
                 
-                <!-- ABA 1: LISTA DE EXCURSÕES COM BOTÃO EDITAR -->
+                <!-- ABA 1: LISTA -->
                 <div class="tab-pane fade show active" id="pane-dashboard">
-                    <div class="header-title"><h2>Gerenciamento de Excursões</h2></div>
+                    <h2 class="mb-4">Gerenciamento de Excursões</h2>
                     <div class="card p-4">
                         <table class="table table-hover align-middle">
                             <thead class="table-dark">
@@ -49,20 +48,9 @@
                             <tbody>
                                 {% for v in lista %}
                                 <tr>
-                                    <td>
-                                        {% if v[5] %}
-                                            <img src="{{ url_for('static', filename='uploads/' + v[5]) }}" style="width: 60px; height: 45px; object-fit: cover; border-radius: 4px;">
-                                        {% else %}
-                                            <span class="text-muted small">Sem foto</span>
-                                        {% endif %}
-                                    </td>
-                                    <td><strong>{{ v[1] }}</strong></td>
-                                    <td>{{ v[2] }}</td>
-                                    <td>{{ v[3] }}</td>
-                                    <td>R$ {{ v[4] }}</td>
-                                    <td>
-                                        <a href="/editar/{{ v[0] }}" class="btn btn-sm btn-secondary">Editar</a>
-                                    </td>
+                                    <td>{% if v[5] %}<img src="{{ url_for('static', filename='uploads/' + v[5]) }}" style="width: 60px; height: 45px; object-fit: cover; border-radius: 4px;">{% else %}<span class="text-muted small">Sem foto</span>{% endif %}</td>
+                                    <td><strong>{{ v[1] }}</strong></td><td>{{ v[2] }}</td><td>{{ v[3] }}</td><td>R$ {{ v[4] }}</td>
+                                    <td><a href="/editar/{{ v[0] }}" class="btn btn-sm btn-secondary">Editar</a></td>
                                 </tr>
                                 {% else %}
                                 <tr><td colspan="6" class="text-center py-4">Nenhuma excursão cadastrada.</td></tr>
@@ -72,115 +60,140 @@
                     </div>
                 </div>
 
-                <!-- ABA 2: ADICIONAR VIAGEM -->
+                <!-- ABA 2: ADICIONAR -->
                 <div class="tab-pane fade" id="pane-nova-viagem">
-                    <div class="header-title"><h2>Lançar Nova Excursão</h2></div>
+                    <h2 class="mb-4">Lançar Nova Excursão</h2>
                     <div class="card p-4" style="max-width: 600px;">
                         <form action="/cadastrar" method="post" enctype="multipart/form-data">
                             <div class="mb-3"><label class="form-label fw-bold">Destino</label><input type="text" name="destino" class="form-control" required></div>
                             <div class="mb-3"><label class="form-label fw-bold">Data da Viagem</label><input type="text" name="data" class="form-control" required></div>
-                            <div class="mb-3"><label class="form-label fw-bold">Total de Vagas</label><input type="number" name="vagas" class="form-control" required></div>
-                            <div class="mb-3"><label class="form-label fw-bold">Preço por pessoa (R$)</label><input type="number" step="0.01" name="preco" class="form-control" required></div>
-                            <div class="mb-4"><label class="form-label fw-bold">Imagem da Excursão</label><input type="file" name="imagem" class="form-control" accept="image/*"></div>
-                            <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Lançar Viagem no Sistema</button>
+                            <div class="mb-3"><label class="form-label fw-bold">Vagas totais</label><input type="number" name="vagas" class="form-control" required></div>
+                            <div class="mb-3"><label class="form-label fw-bold">Preço (R$)</label><input type="number" step="0.01" name="preco" class="form-control" required></div>
+                            <div class="mb-4"><label class="form-label fw-bold">Imagem da viagem</label><input type="file" name="imagem" class="form-control" accept="image/*"></div>
+                            <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Lançar Viagem</button>
                         </form>
                     </div>
                 </div>
 
                 <!-- ABA 3: CONFIGURAR SITE (CMS) -->
                 <div class="tab-pane fade" id="pane-config-site">
-                    <div class="header-title">
-                        <h2>Personalização do Site Oficial</h2>
-                        <p class="text-muted">Gerencie os banners, depoimentos e dúvidas frequentes.</p>
-                    </div>
-                    
+                    <h2 class="mb-4">Personalização do Site Oficial</h2>
                     <div class="row">
-                        <!-- IDENTIDADE E BANNERS (Sem texto, com Link) -->
+                        
+                        <!-- COLUNA ESQUERDA: IDENTIDADE E BANNERS -->
                         <div class="col-md-6">
                             <div class="card p-4">
                                 <h4 class="mb-4">Banners e Identidade</h4>
                                 <form action="/salvar_identidade" method="post" enctype="multipart/form-data">
-                                    <div class="mb-4">
-                                        <label class="form-label fw-bold">Nome da Agência</label>
-                                        <input type="text" name="nome_agencia" class="form-control" value="{{ conf[1] }}">
-                                    </div>
-                                    <div class="mb-4">
-                                        <label class="form-label fw-bold">Logotipo Oficial</label>
-                                        <input type="file" name="logo" class="form-control" accept="image/*">
-                                    </div>
+                                    <div class="mb-3"><label class="fw-bold">Nome da Agência</label><input type="text" name="nome_agencia" class="form-control" value="{{ conf[1] }}"></div>
+                                    <div class="mb-3"><label class="fw-bold">Logotipo Oficial</label><input type="file" name="logo" class="form-control" accept="image/*"></div>
+                                    
                                     <div class="section-separator"></div>
-
-                                    <h5 class="form-section-title">Banners Clicáveis (Sem texto)</h5>
+                                    <h5 class="form-section-title">Banners Clicáveis (Sem textos)</h5>
                                     
                                     <div class="bg-light p-3 border rounded mb-3">
                                         <h6 class="fw-bold mb-3">Banner 1 (Destaque Principal)</h6>
-                                        <div class="mb-3"><label class="form-label small text-muted">Nova Imagem</label><input type="file" name="banner1_img" class="form-control form-control-sm" accept="image/*"></div>
-                                        <div class="mb-2"><label class="form-label small text-muted">Link de Redirecionamento (URL)</label><input type="text" name="banner1_link" class="form-control form-control-sm" value="{{ conf[4] }}"></div>
+                                        <div class="mb-3"><label class="small text-muted">Substituir Imagem</label><input type="file" name="banner1_img" class="form-control form-control-sm" accept="image/*"></div>
+                                        <div class="mb-2"><label class="small text-muted">Link de Redirecionamento (URL)</label><input type="text" name="banner1_link" class="form-control form-control-sm" value="{{ conf[4] }}"></div>
                                     </div>
 
                                     <div class="bg-light p-3 border rounded mb-3">
-                                        <h6 class="fw-bold mb-3">Banner 2 (Meio do Site)</h6>
-                                        <div class="mb-3"><label class="form-label small text-muted">Nova Imagem</label><input type="file" name="banner2_img" class="form-control form-control-sm" accept="image/*"></div>
-                                        <div class="mb-2"><label class="form-label small text-muted">Link de Redirecionamento (URL)</label><input type="text" name="banner2_link" class="form-control form-control-sm" value="{{ conf[6] }}"></div>
+                                        <h6 class="fw-bold mb-3">Banner 2 (Meio do site)</h6>
+                                        <div class="mb-3"><label class="small text-muted">Substituir Imagem</label><input type="file" name="banner2_img" class="form-control form-control-sm" accept="image/*"></div>
+                                        <div class="mb-2"><label class="small text-muted">Link de Redirecionamento (URL)</label><input type="text" name="banner2_link" class="form-control form-control-sm" value="{{ conf[6] }}"></div>
                                     </div>
-                                    <button type="submit" class="btn btn-primary w-100 mt-2">Salvar Banners e Identidade</button>
+                                    <button type="submit" class="btn btn-primary w-100 fw-bold">Salvar Banners e Identidade</button>
                                 </form>
                             </div>
                         </div>
 
-                        <!-- CONTEÚDO (3 Depoimentos, 3 FAQs) -->
+                        <!-- COLUNA DIREITA: CONTEÚDO DINÂMICO (COM BOTÕES DE ADD/REMOVER) -->
                         <div class="col-md-6">
-                            <div class="card p-4">
-                                <h4 class="mb-4">Conteúdo da Página</h4>
-                                <form action="/salvar_conteudo" method="post">
-                                    <h5 class="form-section-title">Seção "Como Funciona"</h5>
-                                    <div class="mb-2"><label class="form-label small text-muted">Passo 1 (Título)</label><input type="text" name="passo1_tit" class="form-control form-control-sm" value="{{ conf[7] }}"></div>
-                                    <div class="mb-4"><label class="form-label small text-muted">Passo 1 (Descrição)</label><textarea name="passo1_desc" class="form-control form-control-sm" rows="2">{{ conf[8] }}</textarea></div>
-                                    <div class="section-separator"></div>
-
-                                    <h5 class="form-section-title">Depoimentos (3 Clientes)</h5>
-                                    <div class="bg-light p-3 border rounded mb-3">
-                                        <div class="mb-2"><label class="form-label small text-muted">Cliente 1</label><input type="text" name="dep1_nome" class="form-control form-control-sm" value="{{ conf[9] }}"></div>
-                                        <div class="mb-2"><label class="form-label small text-muted">Nota</label><input type="number" name="dep1_nota" class="form-control form-control-sm" value="{{ conf[10] }}" min="1" max="5"></div>
-                                        <div class="mb-2"><textarea name="dep1_texto" class="form-control form-control-sm" rows="2">{{ conf[11] }}</textarea></div>
-                                    </div>
-                                    <div class="bg-light p-3 border rounded mb-3">
-                                        <div class="mb-2"><label class="form-label small text-muted">Cliente 2</label><input type="text" name="dep2_nome" class="form-control form-control-sm" value="{{ conf[12] }}"></div>
-                                        <div class="mb-2"><label class="form-label small text-muted">Nota</label><input type="number" name="dep2_nota" class="form-control form-control-sm" value="{{ conf[13] }}" min="1" max="5"></div>
-                                        <div class="mb-2"><textarea name="dep2_texto" class="form-control form-control-sm" rows="2">{{ conf[14] }}</textarea></div>
-                                    </div>
-                                    <div class="bg-light p-3 border rounded mb-3">
-                                        <div class="mb-2"><label class="form-label small text-muted">Cliente 3</label><input type="text" name="dep3_nome" class="form-control form-control-sm" value="{{ conf[15] }}"></div>
-                                        <div class="mb-2"><label class="form-label small text-muted">Nota</label><input type="number" name="dep3_nota" class="form-control form-control-sm" value="{{ conf[16] }}" min="1" max="5"></div>
-                                        <div class="mb-2"><textarea name="dep3_texto" class="form-control form-control-sm" rows="2">{{ conf[17] }}</textarea></div>
-                                    </div>
-                                    <div class="section-separator"></div>
-
-                                    <h5 class="form-section-title">Dúvidas Frequentes (FAQ)</h5>
-                                    <div class="bg-light p-3 border rounded mb-3">
-                                        <div class="mb-2"><label class="form-label small text-muted">Pergunta 1</label><input type="text" name="faq1_perg" class="form-control form-control-sm" value="{{ conf[18] }}"></div>
-                                        <div class="mb-2"><textarea name="faq1_resp" class="form-control form-control-sm" rows="2">{{ conf[19] }}</textarea></div>
-                                    </div>
-                                    <div class="bg-light p-3 border rounded mb-3">
-                                        <div class="mb-2"><label class="form-label small text-muted">Pergunta 2</label><input type="text" name="faq2_perg" class="form-control form-control-sm" value="{{ conf[20] }}"></div>
-                                        <div class="mb-2"><textarea name="faq2_resp" class="form-control form-control-sm" rows="2">{{ conf[21] }}</textarea></div>
-                                    </div>
-                                    <div class="bg-light p-3 border rounded mb-3">
-                                        <div class="mb-2"><label class="form-label small text-muted">Pergunta 3</label><input type="text" name="faq3_perg" class="form-control form-control-sm" value="{{ conf[22] }}"></div>
-                                        <div class="mb-2"><textarea name="faq3_resp" class="form-control form-control-sm" rows="2">{{ conf[23] }}</textarea></div>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary w-100 mt-2">Atualizar Conteúdos</button>
+                            
+                            <!-- Passo a Passo -->
+                            <div class="card p-4 mb-4">
+                                <form action="/salvar_passo" method="post">
+                                    <h5 class="form-section-title">Seção "Como Funciona" (Passo 1)</h5>
+                                    <div class="mb-2"><label class="small fw-bold">Título</label><input type="text" name="passo1_tit" class="form-control form-control-sm" value="{{ conf[7] }}"></div>
+                                    <div class="mb-3"><label class="small fw-bold">Descrição</label><textarea name="passo1_desc" class="form-control form-control-sm" rows="2">{{ conf[8] }}</textarea></div>
+                                    <button type="submit" class="btn btn-secondary btn-sm w-100">Atualizar Texto</button>
                                 </form>
                             </div>
+
+                            <!-- Depoimentos (Dinâmico) -->
+                            <div class="card p-4 mb-4">
+                                <h5 class="form-section-title">Depoimentos Publicados</h5>
+                                
+                                <!-- Lista de Depoimentos existentes -->
+                                <ul class="list-group mb-4 shadow-sm">
+                                    {% for d in deps %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>{{ d[1] }}</strong> <span class="badge bg-warning text-dark ms-2">Nota: {{ d[2] }}</span><br>
+                                            <small class="text-muted">"{{ d[3] }}"</small>
+                                        </div>
+                                        <a href="/del_depoimento/{{ d[0] }}" class="btn btn-sm btn-danger fw-bold" title="Remover Depoimento">X</a>
+                                    </li>
+                                    {% else %}
+                                    <li class="list-group-item text-muted text-center py-3">Nenhum depoimento cadastrado no momento.</li>
+                                    {% endfor %}
+                                </ul>
+
+                                <!-- Formulário para ADD Depoimento -->
+                                <h6 class="fw-bold text-success border-bottom pb-2">Novo Depoimento +</h6>
+                                <form action="/add_depoimento" method="post" class="bg-light p-3 border rounded">
+                                    <div class="mb-2"><input type="text" name="nome" class="form-control form-control-sm" placeholder="Nome do Cliente" required></div>
+                                    <div class="mb-2"><input type="number" name="nota" class="form-control form-control-sm" placeholder="Nota de 1 a 5 (Estrelas)" min="1" max="5" required></div>
+                                    <div class="mb-3"><textarea name="texto" class="form-control form-control-sm" placeholder="Escreva a mensagem do cliente..." required rows="2"></textarea></div>
+                                    <button type="submit" class="btn btn-success btn-sm w-100 fw-bold">Adicionar à Página</button>
+                                </form>
+                            </div>
+
+                            <!-- FAQ (Dinâmico) -->
+                            <div class="card p-4">
+                                <h5 class="form-section-title">Dúvidas Frequentes (FAQ)</h5>
+                                
+                                <!-- Lista de FAQs existentes -->
+                                <ul class="list-group mb-4 shadow-sm">
+                                    {% for f in faqs %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>Q: {{ f[1] }}</strong><br>
+                                            <small class="text-muted">R: {{ f[2] }}</small>
+                                        </div>
+                                        <a href="/del_faq/{{ f[0] }}" class="btn btn-sm btn-danger fw-bold" title="Remover Pergunta">X</a>
+                                    </li>
+                                    {% else %}
+                                    <li class="list-group-item text-muted text-center py-3">Nenhuma dúvida cadastrada no momento.</li>
+                                    {% endfor %}
+                                </ul>
+
+                                <!-- Formulário para ADD FAQ -->
+                                <h6 class="fw-bold text-success border-bottom pb-2">Nova Pergunta +</h6>
+                                <form action="/add_faq" method="post" class="bg-light p-3 border rounded">
+                                    <div class="mb-2"><input type="text" name="pergunta" class="form-control form-control-sm" placeholder="Digite a pergunta frequente..." required></div>
+                                    <div class="mb-3"><textarea name="resposta" class="form-control form-control-sm" placeholder="Digite a resposta..." required rows="2"></textarea></div>
+                                    <button type="submit" class="btn btn-success btn-sm w-100 fw-bold">Adicionar ao FAQ</button>
+                                </form>
+                            </div>
+
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Script para manter o administrador na mesma aba após salvar um conteúdo -->
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+        if(window.location.hash) {
+            var triggerEl = document.querySelector('a[href="' + window.location.hash + '"]');
+            if(triggerEl) { new bootstrap.Tab(triggerEl).show(); }
+        }
+    });
+</script>
 </body>
 </html>
