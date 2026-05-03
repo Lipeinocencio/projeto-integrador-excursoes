@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Administrativo - CaroliExcursões</title>
+    <title>Painel Administrativo - PI Excursões</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #f8f9fa; }
@@ -14,7 +14,7 @@
 <body>
 
 <div class="header-admin text-center">
-    <h1>Painel de Controle - Agência</h1>
+    <h1>Painel de Controle - PI Excursões</h1>
     <p>Gerenciamento de Excursões e Destinos</p>
 </div>
 
@@ -23,7 +23,8 @@
         <div class="col-md-4">
             <div class="card p-4">
                 <h4 class="mb-4">Nova Excursão</h4>
-                <form action="/cadastrar" method="post">
+                <!-- Adicionado o enctype="multipart/form-data" para permitir envio de arquivos -->
+                <form action="/cadastrar" method="post" enctype="multipart/form-data">
                     <div class="mb-3">
                         <label class="form-label">Destino</label>
                         <input type="text" name="destino" class="form-control" placeholder="Ex: Rio de Janeiro" required>
@@ -40,6 +41,11 @@
                         <label class="form-label">Preço (R$)</label>
                         <input type="number" step="0.01" name="preco" class="form-control" placeholder="150.00" required>
                     </div>
+                    <!-- Novo campo de Imagem -->
+                    <div class="mb-3">
+                        <label class="form-label">Imagem da Excursão</label>
+                        <input type="file" name="imagem" class="form-control" accept="image/*">
+                    </div>
                     <button type="submit" class="btn btn-primary w-100">Lançar Viagem</button>
                 </form>
             </div>
@@ -51,6 +57,7 @@
                 <table class="table table-hover">
                     <thead class="table-dark">
                         <tr>
+                            <th>Foto</th> <!-- Nova coluna -->
                             <th>Destino</th>
                             <th>Data</th>
                             <th>Vagas</th>
@@ -60,6 +67,14 @@
                     <tbody>
                         {% for v in lista %}
                         <tr>
+                            <!-- Renderização da miniatura da foto -->
+                            <td>
+                                {% if v[5] %}
+                                    <img src="{{ url_for('static', filename='uploads/' + v[5]) }}" alt="Destino" style="width: 60px; height: 45px; object-fit: cover; border-radius: 4px;">
+                                {% else %}
+                                    <span class="text-muted small">Sem foto</span>
+                                {% endif %}
+                            </td>
                             <td><strong>{{ v[1] }}</strong></td>
                             <td>{{ v[2] }}</td>
                             <td>{{ v[3] }}</td>
