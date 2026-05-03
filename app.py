@@ -75,9 +75,14 @@ def index():
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM viagens")
     viagens = cursor.fetchall()
+    
+    # Busca as configurações do CMS no banco
     cursor.execute("SELECT * FROM configuracoes WHERE id=1")
     config = cursor.fetchone()
+    
     conn.close()
+    
+    # Agora sim enviamos a 'lista' e a 'conf' para o HTML!
     return render_template('index.html', lista=viagens, conf=config)
 
 @app.route('/cadastrar', methods=['POST'])
