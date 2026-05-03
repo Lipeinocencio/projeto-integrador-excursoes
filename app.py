@@ -1,10 +1,20 @@
 from flask import Flask, render_template, request, redirect, session
 import sqlite3
+import os
+from werkzeug.utils import secure_filename
+from flask import Flask, render_template, request, redirect, session
 
 app = Flask(__name__)
 # Chave de segurança para as sessões de login
 app.secret_key = 'chave_secreta_caroli_excursoes'
 
+# Configuração para upload de imagens
+UPLOAD_FOLDER = 'static/uploads'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Limite de 16MB por arquivo
+
+# Cria a pasta caso não exista
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # --- 1. CONFIGURAÇÃO DO BANCO DE DADOS ---
 def inicializar_banco():
