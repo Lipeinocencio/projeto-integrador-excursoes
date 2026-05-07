@@ -268,9 +268,10 @@ def comprar(id_viagem):
                 }
             ],
             "back_urls": {
-                "success": request.host_url + "sucesso",
-                "failure": request.host_url + "falha",
-                "pending": request.host_url + "pendente"
+                "success": "https://projetointegrador.dominionulo.com.br/sucesso",
+                "failure": "https://projetointegrador.dominionulo.com.br/falha",
+                "pending": "https://projetointegrador.dominionulo.com.br/pendente"
+        },
             },
             "auto_return": "approved"
         }
