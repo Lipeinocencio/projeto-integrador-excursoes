@@ -65,19 +65,44 @@ def obter_dados_cms():
     return config, deps, faqs
 
 # --- ROTAS ADMINISTRATIVAS ---
+# --- ROTAS ADMINISTRATIVAS ---
 @app.route('/')
 def index():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
-    # Busca as viagens
-    viagens = cursor.execute("SELECT * FROM viagens").fetchall()
-    # Busca os clientes cadastrados
-    usuarios = cursor.execute("SELECT * FROM usuarios").fetchall()
-    conn.close()
     
+    # 1. Busca as viagens normais
+    viagens = cursor.execute("SELECT * FROM viagens").fetchall()
+    
+    # 2. Busca os usuários
+    usuarios = cursor.execute("SELECT * FROM usuarios").fetchall()
+    
+    # 3. Mágica: Para cada usuário, busca as viagens que ele comprou
+    clientes_lista = []
+    for u in usuarios:
+        id_usuario = u[0]
+        # Cruza as reservas do cliente com os detalhes da viagem
+        compras = cursor.execute('''
+            SELECT v.destino, v.data 
+            FROM reservas r 
+            JOIN viagens v ON r.id_viagem = v.id 
+            WHERE r.id_usuario = ?
+        ''', (id_usuario,)).fetchall()
+        
+        # Cria um "pacote" com os dados do cliente + as compras dele
+        clientes_lista.append({
+            'nome': u[1],
+            'email': u[2],
+            'cpf': u[4],
+            'telefone': u[5],
+            'compras': compras
+        })
+        
+    conn.close()
     config, deps, faqs = obter_dados_cms()
-    # Passamos a lista de usuários para o template como 'clientes'
-    return render_template('index.html', lista=viagens, clientes=usuarios, conf=config, deps=deps, faqs=faqs)
+    
+    # Envia a nossa nova lista turbinada para o HTML
+    return render_template('index.html', lista=viagens, clientes=clientes_lista, conf=config, deps=deps, faqs=faqs)
 
 @app.route('/cadastrar', methods=['POST'])
 def cadastrar():
