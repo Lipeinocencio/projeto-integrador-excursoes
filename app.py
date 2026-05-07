@@ -271,14 +271,13 @@ def comprar(id_viagem):
                 "success": "https://projetointegrador.dominionulo.com.br/sucesso",
                 "failure": "https://projetointegrador.dominionulo.com.br/falha",
                 "pending": "https://projetointegrador.dominionulo.com.br/pendente"
-        },
             },
             "auto_return": "approved"
         }
 
         preference_response = sdk.preference().create(preference_data)
         
-        # VERIFICAÇÃO DE ERRO: Se o Mercado Pago recusar a chave, mostra o erro no ecrã.
+        # VERIFICAÇÃO DE ERRO
         if "response" not in preference_response or "init_point" not in preference_response["response"]:
             return f"<h1>O Mercado Pago recusou a ligação. Erro:</h1><p>{preference_response}</p>"
         
