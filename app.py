@@ -68,10 +68,16 @@ def obter_dados_cms():
 @app.route('/')
 def index():
     conn = sqlite3.connect(DB_NAME)
-    viagens = conn.cursor().execute("SELECT * FROM viagens").fetchall()
+    cursor = conn.cursor()
+    # Busca as viagens
+    viagens = cursor.execute("SELECT * FROM viagens").fetchall()
+    # Busca os clientes cadastrados
+    usuarios = cursor.execute("SELECT * FROM usuarios").fetchall()
     conn.close()
+    
     config, deps, faqs = obter_dados_cms()
-    return render_template('index.html', lista=viagens, conf=config, deps=deps, faqs=faqs)
+    # Passamos a lista de usuários para o template como 'clientes'
+    return render_template('index.html', lista=viagens, clientes=usuarios, conf=config, deps=deps, faqs=faqs)
 
 @app.route('/cadastrar', methods=['POST'])
 def cadastrar():
