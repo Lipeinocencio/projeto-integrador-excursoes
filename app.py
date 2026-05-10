@@ -30,18 +30,16 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 def editar_viagem(id):
     try:
         conn = sqlite3.connect(DB_NAME)
-        cursor = conn.cursor()
-        viagem = cursor.execute("SELECT * FROM viagens WHERE id=?", (id,)).fetchone()
+        viagem = conn.cursor().execute("SELECT * FROM viagens WHERE id=?", (id,)).fetchone()
         conn.close()
         
         if not viagem:
-            return "<h1>Erro: Viagem não encontrada no banco de dados.</h1>"
+            return "<h1>Aviso: Nenhuma viagem encontrada com este ID.</h1>", 200
             
         return render_template('editar.html', v=viagem)
     except Exception as e:
-        # Se der erro 500, agora ele vai escrever o motivo na sua tela
-        return f"<h1>Erro interno na rota Editar:</h1><p>{str(e)}</p>"
-
+        # O ", 200" engana o LiteSpeed para ele exibir o nosso texto em vez da tela preta
+        return f"<h1 style='color:#367C2B'>O VERDADEIRO ERRO É:</h1><p>{str(e)}</p>", 200
 # ... (Mantenha o restante do código igual) ...
 
 def salvar_imagem(file_obj):
