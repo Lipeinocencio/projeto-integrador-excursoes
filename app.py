@@ -11,9 +11,16 @@ app.secret_key = 'chave_secreta_caroli_excursoes'
 sdk = mercadopago.SDK("APP_USR-4508380654619786-050619-e6b70695379fd4e5cdd4ded2c2614463-3384502064")
 
 DB_NAME = 'sistema.db'
-UPLOAD_FOLDER = 'static/uploads'
+import os
+
+# Caminho absoluto para a pasta de uploads no seu cPanel
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# Garante que a pasta existe (O cPanel às vezes não a cria sozinho)
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
 
 def salvar_imagem(file_obj):
     if file_obj and file_obj.filename != '':
