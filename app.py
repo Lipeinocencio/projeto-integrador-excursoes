@@ -4,7 +4,11 @@ import mercadopago
 from flask import Flask, render_template, request, redirect, session
 from werkzeug.utils import secure_filename
 
-app = Flask(__name__)
+# 1. Definimos a pasta pública primeiro
+PASTA_PUBLICA = '/home/dominionulocom/projetointegrador'
+
+# 2. OBRIGAMOS O FLASK A USAR A PASTA PÚBLICA PARA BUSCAR AS IMAGENS
+app = Flask(__name__, static_folder=os.path.join(PASTA_PUBLICA, 'static'))
 app.secret_key = 'chave_secreta_caroli_excursoes'
 
 # --- CREDENCIAL DO MERCADO PAGO ---
@@ -12,14 +16,14 @@ sdk = mercadopago.SDK("APP_USR-4508380654619786-050619-e6b70695379fd4e5cdd4ded2c
 
 DB_NAME = 'sistema.db'
 
-# --- CONFIGURAÇÃO DE UPLOADS (CAMINHO ABSOLUTO CPANEL) ---
-# Caminho absoluto DIRETO para a pasta pública do cPanel
-PASTA_PUBLICA = '/home/dominionulocom/projetointegrador'
+# --- CONFIGURAÇÃO DE UPLOADS ---
 UPLOAD_FOLDER = os.path.join(PASTA_PUBLICA, 'static', 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# Garante que a pasta existe (O cPanel às vezes não a cria sozinho)
+# Garante que a pasta existe
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# ... (MANTENHA O RESTO DO CÓDIGO EXATAMENTE COMO ESTÁ A PARTIR DAQUI) ...
 
 def salvar_imagem(file_obj):
     if file_obj and file_obj.filename != '':
