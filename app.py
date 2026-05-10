@@ -136,12 +136,14 @@ def editar_viagem(id):
         viagem = conn.cursor().execute("SELECT * FROM viagens WHERE id=?", (id,)).fetchone()
         conn.close()
         
+        # CORREÇÃO: Enviamos também os dados do CMS para não dar erro de 'conf'
+        config, deps, faqs = obter_dados_cms()
+        
         if not viagem:
             return "<h1>Aviso: Nenhuma viagem encontrada com este ID.</h1>", 200
             
-        return render_template('editar.html', v=viagem)
+        return render_template('editar.html', v=viagem, conf=config)
     except Exception as e:
-        # Engana o servidor LiteSpeed para mostrar o VERDADEIRO erro na cor da marca
         return f"<h1 style='color:#367C2B'>O VERDADEIRO ERRO É:</h1><p>{str(e)}</p>", 200
 
 @app.route('/atualizar/<int:id>', methods=['POST'])
@@ -269,7 +271,10 @@ def dashboard():
     conn = sqlite3.connect(DB_NAME)
     viagens = conn.cursor().execute("SELECT * FROM viagens").fetchall()
     conn.close()
-    return render_template('dashboard.html', lista=viagens)
+    
+    # CORREÇÃO: Enviamos também os dados do CMS para o painel do cliente
+    config, deps, faqs = obter_dados_cms()
+    return render_template('dashboard.html', lista=viagens, conf=config)
 
 # --- INTEGRAÇÃO MERCADO PAGO ---
 @app.route('/comprar/<int:id_viagem>')
