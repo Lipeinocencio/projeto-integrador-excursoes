@@ -4,43 +4,21 @@ import mercadopago
 from flask import Flask, render_template, request, redirect, session
 from werkzeug.utils import secure_filename
 
-# 1. DEFINIÇÃO DE CAMINHOS ABSOLUTOS (ESSENCIAL PARA CPANEL)
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-PASTA_PUBLICA = '/home/dominionulocom/projetointegrador'
-DB_NAME = os.path.join(BASE_DIR, 'sistema.db')
-
-app = Flask(__name__, 
-            static_folder=os.path.join(PASTA_PUBLICA, 'static'),
-            template_folder=os.path.join(BASE_DIR, 'templates'))
-
+app = Flask(__name__)
 app.secret_key = 'chave_secreta_caroli_excursoes'
 
 # --- CREDENCIAL DO MERCADO PAGO ---
 sdk = mercadopago.SDK("APP_USR-4508380654619786-050619-e6b70695379fd4e5cdd4ded2c2614463-3384502064")
 
-# --- CONFIGURAÇÃO DE UPLOADS ---
+DB_NAME = 'sistema.db'
+
+# --- CONFIGURAÇÃO DE UPLOADS (CAMINHO ABSOLUTO CPANEL) ---
+PASTA_PUBLICA = '/home/dominionulocom/projetointegrador'
 UPLOAD_FOLDER = os.path.join(PASTA_PUBLICA, 'static', 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Garante que a pasta existe no servidor
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-# ... (Mantenha as funções auxiliares e a rota index iguais) ...
-
-# --- ROTA DE EDITAR COM RASTREADOR DE ERRO ---
-@app.route('/editar/<int:id>')
-def editar_viagem(id):
-    try:
-        conn = sqlite3.connect(DB_NAME)
-        viagem = conn.cursor().execute("SELECT * FROM viagens WHERE id=?", (id,)).fetchone()
-        conn.close()
-        
-        if not viagem:
-            return "<h1>Aviso: Nenhuma viagem encontrada com este ID.</h1>", 200
-            
-        return render_template('editar.html', v=viagem)
-    except Exception as e:
-        # O ", 200" engana o LiteSpeed para ele exibir o nosso texto em vez da tela preta
-        return f"<h1 style='color:#367C2B'>O VERDADEIRO ERRO É:</h1><p>{str(e)}</p>", 200
-# ... (Mantenha o restante do código igual) ...
 
 def salvar_imagem(file_obj):
     if file_obj and file_obj.filename != '':
@@ -53,12 +31,10 @@ def inicializar_banco():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
-    # Tabelas do Sistema
     cursor.execute('''CREATE TABLE IF NOT EXISTS viagens (id INTEGER PRIMARY KEY AUTOINCREMENT, destino TEXT NOT NULL, data TEXT NOT NULL, vagas_totais INTEGER, preco REAL, imagem TEXT)''')
     cursor.execute('''CREATE TABLE IF NOT EXISTS usuarios (id INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT NOT NULL, email TEXT NOT NULL UNIQUE, senha TEXT NOT NULL, cpf TEXT NOT NULL, telefone TEXT NOT NULL)''')
     cursor.execute('''CREATE TABLE IF NOT EXISTS reservas (id INTEGER PRIMARY KEY AUTOINCREMENT, id_usuario INTEGER, id_viagem INTEGER, data_reserva TIMESTAMP DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (id_usuario) REFERENCES usuarios(id), FOREIGN KEY (id_viagem) REFERENCES viagens(id))''')
 
-    # Novas Tabelas do CMS
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS configuracoes (
         id INTEGER PRIMARY KEY CHECK (id = 1),
@@ -97,13 +73,9 @@ def index():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     
-    # 1. Busca as viagens normais
     viagens = cursor.execute("SELECT * FROM viagens").fetchall()
-    
-    # 2. Busca os usuários
     usuarios = cursor.execute("SELECT * FROM usuarios").fetchall()
     
-    # 3. Mágica: Para cada usuário, busca as viagens que ele comprou
     clientes_lista = []
     for u in usuarios:
         id_usuario = u[0]
@@ -122,7 +94,6 @@ def index():
             'compras': compras
         })
 
-    # --- MATEMÁTICA DO DASHBOARD ---
     total_viagens = len(viagens)
     total_clientes = len(usuarios)
     total_reservas = cursor.execute("SELECT COUNT(*) FROM reservas").fetchone()[0]
@@ -160,10 +131,18 @@ def cadastrar():
 
 @app.route('/editar/<int:id>')
 def editar_viagem(id):
-    conn = sqlite3.connect(DB_NAME)
-    viagem = conn.cursor().execute("SELECT * FROM viagens WHERE id=?", (id,)).fetchone()
-    conn.close()
-    return render_template('editar.html', v=viagem)
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        viagem = conn.cursor().execute("SELECT * FROM viagens WHERE id=?", (id,)).fetchone()
+        conn.close()
+        
+        if not viagem:
+            return "<h1>Aviso: Nenhuma viagem encontrada com este ID.</h1>", 200
+            
+        return render_template('editar.html', v=viagem)
+    except Exception as e:
+        # Engana o servidor LiteSpeed para mostrar o VERDADEIRO erro na cor da marca
+        return f"<h1 style='color:#367C2B'>O VERDADEIRO ERRO É:</h1><p>{str(e)}</p>", 200
 
 @app.route('/atualizar/<int:id>', methods=['POST'])
 def atualizar_viagem(id):
@@ -301,15 +280,11 @@ def comprar(id_viagem):
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
         
-        # Busca a excursão
         viagem = cursor.execute("SELECT * FROM viagens WHERE id = ?", (id_viagem,)).fetchone()
-        
-        # Registra a reserva
         cursor.execute("INSERT INTO reservas (id_usuario, id_viagem) VALUES (?, ?)", (session['usuario_id'], id_viagem))
         conn.commit()
         conn.close()
 
-        # Cria a cobrança no Mercado Pago
         preference_data = {
             "items": [
                 {
@@ -329,11 +304,9 @@ def comprar(id_viagem):
 
         preference_response = sdk.preference().create(preference_data)
         
-        # VERIFICAÇÃO DE ERRO
         if "response" not in preference_response or "init_point" not in preference_response["response"]:
             return f"<h1>O Mercado Pago recusou a ligação. Erro:</h1><p>{preference_response}</p>"
         
-        # Redireciona o cliente para a tela de pagamento
         return redirect(preference_response["response"]["init_point"])
 
     except Exception as e:
@@ -342,15 +315,15 @@ def comprar(id_viagem):
 # --- ROTAS DE RETORNO DO PAGAMENTO ---
 @app.route('/sucesso')
 def sucesso():
-    return "<div style='text-align:center; margin-top:100px; font-family:sans-serif;'><h1>Pagamento Aprovado! 🎉</h1><p>A tua vaga está garantida na excursão.</p><br><a href='/dashboard' style='background:#2980b9; color:white; padding:10px 20px; text-decoration:none; border-radius:5px;'>Voltar às minhas viagens</a></div>"
+    return "<div style='text-align:center; margin-top:100px; font-family:sans-serif;'><h1>Pagamento Aprovado! 🎉</h1><p>Sua vaga está garantida na excursão.</p><br><a href='/dashboard' style='background:#367C2B; color:white; padding:10px 20px; text-decoration:none; border-radius:5px;'>Voltar às minhas viagens</a></div>"
 
 @app.route('/falha')
 def falha():
-    return "<div style='text-align:center; margin-top:100px; font-family:sans-serif;'><h1>Pagamento Recusado ❌</h1><p>Houve um problema com a tua transação. Tente novamente.</p><br><a href='/dashboard' style='background:#e74c3c; color:white; padding:10px 20px; text-decoration:none; border-radius:5px;'>Tentar Novamente</a></div>"
+    return "<div style='text-align:center; margin-top:100px; font-family:sans-serif;'><h1>Pagamento Recusado ❌</h1><p>Houve um problema com a sua transação. Tente novamente.</p><br><a href='/dashboard' style='background:#e74c3c; color:white; padding:10px 20px; text-decoration:none; border-radius:5px;'>Tentar Novamente</a></div>"
 
 @app.route('/pendente')
 def pendente():
-    return "<div style='text-align:center; margin-top:100px; font-family:sans-serif;'><h1>Pagamento Pendente ⏳</h1><p>Estamos a aguardar a compensação do teu Pix ou Boleto.</p><br><a href='/dashboard' style='background:#f39c12; color:white; padding:10px 20px; text-decoration:none; border-radius:5px;'>Acompanhar Pedido</a></div>"
+    return "<div style='text-align:center; margin-top:100px; font-family:sans-serif;'><h1>Pagamento Pendente ⏳</h1><p>Estamos aguardando a compensação do seu Pix ou Boleto.</p><br><a href='/dashboard' style='background:#f39c12; color:white; padding:10px 20px; text-decoration:none; border-radius:5px;'>Acompanhar Pedido</a></div>"
 
 @app.route('/logout')
 def logout():
