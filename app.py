@@ -4,26 +4,45 @@ import mercadopago
 from flask import Flask, render_template, request, redirect, session
 from werkzeug.utils import secure_filename
 
-# 1. Definimos a pasta pública primeiro
+# 1. DEFINIÇÃO DE CAMINHOS ABSOLUTOS (ESSENCIAL PARA CPANEL)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PASTA_PUBLICA = '/home/dominionulocom/projetointegrador'
+DB_NAME = os.path.join(BASE_DIR, 'sistema.db')
 
-# 2. OBRIGAMOS O FLASK A USAR A PASTA PÚBLICA PARA BUSCAR AS IMAGENS
-app = Flask(__name__, static_folder=os.path.join(PASTA_PUBLICA, 'static'))
+app = Flask(__name__, 
+            static_folder=os.path.join(PASTA_PUBLICA, 'static'),
+            template_folder=os.path.join(BASE_DIR, 'templates'))
+
 app.secret_key = 'chave_secreta_caroli_excursoes'
 
 # --- CREDENCIAL DO MERCADO PAGO ---
 sdk = mercadopago.SDK("APP_USR-4508380654619786-050619-e6b70695379fd4e5cdd4ded2c2614463-3384502064")
 
-DB_NAME = 'sistema.db'
-
 # --- CONFIGURAÇÃO DE UPLOADS ---
 UPLOAD_FOLDER = os.path.join(PASTA_PUBLICA, 'static', 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-# Garante que a pasta existe
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# ... (MANTENHA O RESTO DO CÓDIGO EXATAMENTE COMO ESTÁ A PARTIR DAQUI) ...
+# ... (Mantenha as funções auxiliares e a rota index iguais) ...
+
+# --- ROTA DE EDITAR COM RASTREADOR DE ERRO ---
+@app.route('/editar/<int:id>')
+def editar_viagem(id):
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        viagem = cursor.execute("SELECT * FROM viagens WHERE id=?", (id,)).fetchone()
+        conn.close()
+        
+        if not viagem:
+            return "<h1>Erro: Viagem não encontrada no banco de dados.</h1>"
+            
+        return render_template('editar.html', v=viagem)
+    except Exception as e:
+        # Se der erro 500, agora ele vai escrever o motivo na sua tela
+        return f"<h1>Erro interno na rota Editar:</h1><p>{str(e)}</p>"
+
+# ... (Mantenha o restante do código igual) ...
 
 def salvar_imagem(file_obj):
     if file_obj and file_obj.filename != '':
