@@ -3,161 +3,190 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ conf[1] }} - Site Oficial</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;900&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>{{ conf[1] if conf else 'PI Excursões' }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
     <style>
-        :root { --primary-color: #1D3557; --primary-hover: #14213d; --secondary-color: #2980b9; --secondary-hover: #1f6391; --text-dark: #2B2D42; --text-light: #6C757D; --bg-light: #F4F7F6; --white: #ffffff; --border-color: #EAECEF; --radius-main: 16px; --radius-btn: 8px; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background-color: var(--bg-light); color: var(--text-dark); font-family: 'Open Sans', sans-serif; line-height: 1.6; }
-        h1, h2, h3, h4, .logo { font-family: 'Montserrat', sans-serif; }
-        a { text-decoration: none; color: inherit; transition: color 0.3s; }
-        a:hover { color: var(--secondary-color); }
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-        .btn { padding: 12px 24px; border: none; border-radius: var(--radius-btn); cursor: pointer; font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 13px; text-transform: uppercase; transition: all 0.3s ease; text-align: center; }
-        .btn-secondary { background-color: var(--secondary-color); color: var(--white); width: 100%; margin-top: 15px; }
-        .btn-secondary:hover { background-color: var(--secondary-hover); transform: translateY(-2px); }
-        .top-bar { background-color: var(--text-dark); color: #ccc; font-size: 12px; padding: 10px 0; font-weight: 600; }
-        .top-bar .container { display: flex; justify-content: space-between; }
-        header { background-color: var(--white); box-shadow: 0 4px 12px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
-        .header-main { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; }
-        .logo-container { display: flex; align-items: center; gap: 15px; }
-        .logo-img { height: 40px; border-radius: 4px; }
-        .logo-text { font-size: 26px; font-weight: 900; color: var(--primary-color); text-transform: uppercase; letter-spacing: -1px; }
-        .header-actions { display: flex; gap: 25px; align-items: center; color: var(--primary-color); font-family: 'Montserrat', sans-serif; font-size: 14px; font-weight: 700; text-transform: uppercase; }
-        .navbar { background-color: var(--white); border-top: 1px solid var(--border-color); display: flex; justify-content: center; padding: 15px 0; gap: 40px; }
-        .navbar a { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 13px; text-transform: uppercase; color: var(--primary-color); }
-        
-        .banner-link { display: block; width: 100%; text-decoration: none; cursor: pointer; }
-        .banner-img-container { background-position: center; background-size: cover; background-repeat: no-repeat; width: 100%; min-height: 400px; }
-
-        .section-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px; margin-top: 50px;}
-        .section-header h2 { font-size: 26px; color: var(--primary-color); font-weight: 900; position: relative; padding-left: 15px; }
-        .section-header h2::before { content: ''; position: absolute; left: 0; top: 10%; height: 80%; width: 5px; background-color: var(--secondary-color); border-radius: 5px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px; margin-bottom: 60px; }
-        .card { background: var(--white); border-radius: var(--radius-main); overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); transition: all 0.3s ease; display: flex; flex-direction: column; border: 1px solid rgba(0,0,0,0.03); }
-        .card:hover { transform: translateY(-8px); box-shadow: 0 12px 30px rgba(0,0,0,0.08); }
-        .card-img { height: 190px; background-color: #ddd; display: flex; align-items: center; justify-content: center; background-size: cover; background-position: center; position: relative; }
-        .card-body { padding: 25px; display: flex; flex-direction: column; flex: 1; }
-        .card-meta { display: flex; flex-wrap: wrap; gap: 10px; font-size: 12px; color: var(--text-light); margin-bottom: 12px; font-weight: 600; }
-        .card-meta span { background: var(--bg-light); padding: 5px 10px; border-radius: 6px; font-family: 'Montserrat', sans-serif; }
-        .card-title { font-size: 20px; margin-bottom: 12px; color: var(--primary-color); line-height: 1.3; }
-        .card-price { font-size: 22px; color: var(--secondary-color); font-weight: 900; margin-top: auto; font-family: 'Montserrat', sans-serif;}
-        .card-price small { font-size: 12px; font-weight: 600; color: var(--text-light); display: block; margin-bottom: 2px; }
-        
-        .section-title-center { text-align: center; margin-bottom: 40px; margin-top: 80px;}
-        .section-title-center h2 { font-size: 32px; color: var(--primary-color); font-weight: 900;}
-        .steps-wrapper { background-color: var(--white); padding: 80px 0; border-top: 1px solid var(--border-color); }
-        .steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px; text-align: center; }
-        .step-title { font-size: 18px; margin-bottom: 10px; color: var(--primary-color); }
-        
-        .testimonials { background: linear-gradient(135deg, var(--primary-color) 0%, #0F172A 100%); color: var(--white); padding: 80px 0; text-align: center; }
-        .test-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px; }
-        .test-card { background: rgba(255, 255, 255, 0.05); padding: 30px; border-radius: var(--radius-main); text-align: left; }
-        .stars { color: #FBBF24; font-weight: 700; margin-bottom: 15px; }
-        footer { background-color: var(--primary-color); color: #94A3B8; padding: 40px 0; text-align: center; font-size: 14px; border-top: 4px solid var(--secondary-color);}
-
-        details { background: var(--white); border: 1px solid var(--border-color); margin-bottom: 15px; border-radius: 12px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        summary { font-family: 'Montserrat', sans-serif; font-weight: 700; color: var(--primary-color); cursor: pointer; font-size: 15px; list-style: none;}
-        .faq-content { margin-top: 10px; color: var(--text-light); font-size: 15px; line-height: 1.6; }
+        :root {
+            --cor-marca: #367C2B;
+        }
+        .bg-marca { background-color: var(--cor-marca) !important; }
+        .text-marca { color: var(--cor-marca) !important; }
+        .btn-marca {
+            background-color: var(--cor-marca);
+            color: white;
+            border: none;
+        }
+        .btn-marca:hover {
+            background-color: #2b6322;
+            color: white;
+        }
     </style>
 </head>
-<body>
+<body class="bg-light">
 
-    <div class="top-bar"><div class="container"><div><span>Atendimento Exclusivo</span></div></div></div>
-    
-    <header>
-        <div class="container header-main">
-            <a href="/site" class="logo-container">
-                {% if conf[2] %}
-                <img src="{{ url_for('static', filename='uploads/' + conf[2]) }}" alt="Logo" class="logo-img">
-                {% else %}
-                <span class="logo-text">{{ conf[1] }}</span>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-marca shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold d-flex align-items-center" href="/site">
+                {% if conf and conf[2] %}
+                    <img src="/static/uploads/{{ conf[2] }}" alt="Logo" height="40" class="me-2 rounded">
                 {% endif %}
+                {{ conf[1] if conf else 'PI Excursões' }}
             </a>
-            <div class="header-actions">
-                <a href="/login" title="Minha Conta">Minha Conta</a>
-                <a href="/" title="Painel Admin">Painel Admin</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" href="#excursoes">Excursões</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#comofunciona">Como Funciona</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#depoimentos">Depoimentos</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#faq">FAQ</a></li>
+                    <li class="nav-item ms-lg-3">
+                        <a class="btn btn-light text-marca fw-bold" href="/login">Área do Cliente</a>
+                    </li>
+                </ul>
             </div>
         </div>
-        <nav class="navbar"><a href="#">Início</a><a href="#">Catálogo</a></nav>
-    </header>
+    </nav>
 
-    <!-- BANNER 1 (Clicável e Limpo) -->
-    <a href="{{ conf[4] if conf[4] else '#' }}" class="banner-link">
-        <div class="banner-img-container" style="background-image: url('{% if conf[3] %}{{ url_for("static", filename="uploads/" + conf[3]) }}{% else %}https://via.placeholder.com/1200x400/1D3557/fff?text=BANNER+PRINCIPAL{% endif %}');"></div>
-    </a>
-
-    <main class="container">
-        <div class="section-header"><h2>Nossas Excursões Ativas</h2></div>
-        <div class="grid">
-            {% for viagem in lista %}
-            <div class="card">
-                <div class="card-img" style="background-image: url('{% if viagem[5] %}{{ url_for('static', filename='uploads/' + viagem[5]) }}{% else %}https://via.placeholder.com/400x200/1D3557/fff?text=SEM+FOTO{% endif %}');"></div>
-                <div class="card-body">
-                    <div class="card-meta"><span>Data: {{ viagem[2] }}</span><span>Vagas: {{ viagem[3] }}</span></div>
-                    <h3 class="card-title">{{ viagem[1] }}</h3>
-                    <div class="card-price"><small>A partir de:</small>R$ {{ viagem[4] }}</div>
-                    <a href="/comprar/{{ viagem[0] }}" class="btn btn-secondary">Reservar Passagem</a>
-                </div>
-            </div>
-            {% else %}
-            <p>Nenhuma excursão cadastrada no momento.</p>
-            {% endfor %}
+    {% if conf and (conf[3] or conf[5]) %}
+    <div id="carrosselPrincipal" class="carousel slide shadow-sm" data-bs-ride="carousel" data-bs-interval="4000">
+      <div class="carousel-inner">
+        
+        {% if conf[3] %}
+        <div class="carousel-item active">
+          <a href="{{ conf[4] if conf[4] != '#' else 'javascript:void(0)' }}">
+            <img src="/static/uploads/{{ conf[3] }}" class="d-block w-100" alt="Banner" style="max-height: 500px; object-fit: cover;">
+          </a>
         </div>
-    </main>
+        {% endif %}
 
-    <!-- BANNER 2 -->
-    {% if conf[5] %}
-    <div class="container" style="margin-bottom: 60px;">
-        <a href="{{ conf[6] if conf[6] else '#' }}" class="banner-link">
-            <div class="banner-img-container" style="background-image: url('{{ url_for("static", filename="uploads/" + conf[5]) }}'); min-height: 250px; border-radius: var(--radius-main);"></div>
-        </a>
+        {% if conf[5] %}
+        <div class="carousel-item {% if not conf[3] %}active{% endif %}">
+          <a href="{{ conf[6] if conf[6] != '#' else 'javascript:void(0)' }}">
+            <img src="/static/uploads/{{ conf[5] }}" class="d-block w-100" alt="Banner" style="max-height: 500px; object-fit: cover;">
+          </a>
+        </div>
+        {% endif %}
+
+      </div>
+
+      {% if conf[3] and conf[5] %}
+      <button class="carousel-control-prev" type="button" data-bs-target="#carrosselPrincipal" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true" style="background-color: var(--cor-marca); border-radius: 50%; padding: 20px;"></span>
+        <span class="visually-hidden">Anterior</span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#carrosselPrincipal" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true" style="background-color: var(--cor-marca); border-radius: 50%; padding: 20px;"></span>
+        <span class="visually-hidden">Próximo</span>
+      </button>
+      {% endif %}
     </div>
     {% endif %}
-
-    <!-- COMO FUNCIONA -->
-    <section class="steps-wrapper">
-        <div class="container">
-            <div class="section-title-center"><h2>Como Funciona?</h2></div>
-            <div class="steps-grid">
-                <div class="step-card"><h3 class="step-title">{{ conf[7] }}</h3><p class="step-desc">{{ conf[8] }}</p></div>
-                <div class="step-card"><h3 class="step-title">Receba as Instruções</h3><p class="step-desc">Você receberá todos os detalhes para o dia da viagem.</p></div>
-                <div class="step-card"><h3 class="step-title">Embarque</h3><p class="step-desc">Encontre nossa equipe no ponto de encontro.</p></div>
-            </div>
-        </div>
-    </section>
-
-    <!-- DEPOIMENTOS DINÂMICOS -->
-    {% if deps %}
-    <section class="testimonials">
-        <div class="container">
-            <div class="section-title-center"><h2 style="color: white;">O que dizem nossos passageiros</h2></div>
-            <div class="test-grid">
-                {% for d in deps %}
-                <div class="test-card">
-                    <div class="stars">Avaliação: {{ d[2] }}/5</div>
-                    <p class="test-text" style="color: #E2E8F0; font-style: italic;">"{{ d[3] }}"</p>
-                    <p style="margin-top: 15px; font-weight: bold; color: white;">- {{ d[1] }}</p>
+    <div class="container my-5" id="excursoes">
+        <h2 class="text-center fw-bold mb-4 text-marca">Nossas Próximas Excursões</h2>
+        <div class="row g-4">
+            {% if lista %}
+                {% for v in lista %}
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        {% if v[5] %}
+                            <img src="/static/uploads/{{ v[5] }}" class="card-img-top" alt="Viagem" style="height: 250px; object-fit: cover;">
+                        {% else %}
+                            <div class="card-img-top bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 250px;">
+                                Sem Imagem
+                            </div>
+                        {% endif %}
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-bold">{{ v[1] }}</h5>
+                            <p class="card-text text-muted mb-1">📅 {{ v[2] }}</p>
+                            <p class="card-text text-muted mb-3">🎫 {{ v[3] }} Vagas Totais</p>
+                            <h4 class="text-marca fw-bold mb-3">R$ {{ "%.2f"|format(v[4]) }}</h4>
+                            <div class="mt-auto">
+                                <a href="/comprar/{{ v[0] }}" class="btn btn-marca w-100 fw-bold py-2">Comprar Agora</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 {% endfor %}
+            {% else %}
+                <div class="col-12 text-center">
+                    <p class="text-muted fs-5">Nenhuma excursão cadastrada no momento. Volte em breve!</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="bg-white py-5" id="comofunciona">
+        <div class="container text-center">
+            <h2 class="fw-bold mb-4 text-marca">Como Funciona</h2>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="p-4 rounded bg-light border">
+                        <h4 class="fw-bold">{{ conf[7] if conf and conf[7] else 'Escolha e Compre' }}</h4>
+                        <p class="text-muted">{{ conf[8] if conf and conf[8] else 'Selecione o evento desejado e pague com segurança.' }}</p>
+                    </div>
+                </div>
             </div>
         </div>
-    </section>
-    {% endif %}
-
-    <!-- FAQ DINÂMICO -->
-    {% if faqs %}
-    <div class="container" style="max-width: 800px; margin: 0 auto 100px;">
-        <div class="section-title-center"><h2>Dúvidas Frequentes</h2></div>
-        {% for f in faqs %}
-        <details>
-            <summary>{{ f[1] }}</summary>
-            <div class="faq-content">{{ f[2] }}</div>
-        </details>
-        {% endfor %}
     </div>
-    {% endif %}
 
-    <footer><p>© 2026 {{ conf[1] }}. Todos os direitos reservados.</p></footer>
+    <div class="container my-5" id="depoimentos">
+        <h2 class="text-center fw-bold mb-4 text-marca">O que dizem sobre nós</h2>
+        <div class="row g-4">
+            {% if deps %}
+                {% for d in deps %}
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-body text-center">
+                            <h5 class="card-title fw-bold">{{ d[1] }}</h5>
+                            <p class="text-warning mb-2">
+                                {% for _ in range(d[2]) %}⭐{% endfor %}
+                            </p>
+                            <p class="card-text fst-italic">"{{ d[3] }}"</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12 text-center text-muted">Nenhum depoimento ainda.</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="bg-white py-5" id="faq">
+        <div class="container">
+            <h2 class="text-center fw-bold mb-4 text-marca">Dúvidas Frequentes</h2>
+            <div class="accordion shadow-sm" id="accordionFAQ">
+                {% if faqs %}
+                    {% for f in faqs %}
+                    <div class="accordion-item border-0 border-bottom">
+                        <h2 class="accordion-header" id="heading{{ f[0] }}">
+                            <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ f[0] }}">
+                                {{ f[1] }}
+                            </button>
+                        </h2>
+                        <div id="collapse{{ f[0] }}" class="accordion-collapse collapse" data-bs-parent="#accordionFAQ">
+                            <div class="accordion-body text-muted">
+                                {{ f[2] }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-center text-muted">Nenhuma dúvida cadastrada.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-marca text-white py-4 text-center mt-auto">
+        <div class="container">
+            <p class="mb-0 fw-bold">&copy; 2026 {{ conf[1] if conf else 'PI Excursões' }}. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
