@@ -4,21 +4,27 @@ import mercadopago
 from flask import Flask, render_template, request, redirect, session
 from werkzeug.utils import secure_filename
 
+# 1. PEGAMOS O CAMINHO EXATO DA PASTA ONDE O CÓDIGO ESTÁ
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# 2. OBRIGAMOS O BANCO DE DADOS A FICAR DENTRO DESSA PASTA
+DB_NAME = os.path.join(BASE_DIR, 'sistema.db')
+
+# 3. DEFINIMOS A PASTA PÚBLICA PARA AS IMAGENS (conforme sua imagem anterior)
+PASTA_PUBLICA = '/home/dominionulocom/projetointegrador'
+
 app = Flask(__name__)
 app.secret_key = 'chave_secreta_caroli_excursoes'
 
 # --- CREDENCIAL DO MERCADO PAGO ---
 sdk = mercadopago.SDK("APP_USR-4508380654619786-050619-e6b70695379fd4e5cdd4ded2c2614463-3384502064")
 
-DB_NAME = 'sistema.db'
-
-# --- CONFIGURAÇÃO DE UPLOADS (CAMINHO ABSOLUTO CPANEL) ---
-PASTA_PUBLICA = '/home/dominionulocom/projetointegrador'
+# --- CONFIGURAÇÃO DE UPLOADS ---
 UPLOAD_FOLDER = os.path.join(PASTA_PUBLICA, 'static', 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-# Garante que a pasta existe no servidor
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# ... (Mantenha todo o resto do código igual daqui para baixo) ...
 
 def salvar_imagem(file_obj):
     if file_obj and file_obj.filename != '':
