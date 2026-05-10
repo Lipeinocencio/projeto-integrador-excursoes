@@ -11,16 +11,15 @@ app.secret_key = 'chave_secreta_caroli_excursoes'
 sdk = mercadopago.SDK("APP_USR-4508380654619786-050619-e6b70695379fd4e5cdd4ded2c2614463-3384502064")
 
 DB_NAME = 'sistema.db'
-import os
 
-# Caminho absoluto para a pasta de uploads no seu cPanel
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
+# --- CONFIGURAÇÃO DE UPLOADS (CAMINHO ABSOLUTO CPANEL) ---
+# Caminho absoluto DIRETO para a pasta pública do cPanel
+PASTA_PUBLICA = '/home/dominionulocom/projetointegrador'
+UPLOAD_FOLDER = os.path.join(PASTA_PUBLICA, 'static', 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Garante que a pasta existe (O cPanel às vezes não a cria sozinho)
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 def salvar_imagem(file_obj):
     if file_obj and file_obj.filename != '':
@@ -72,7 +71,6 @@ def obter_dados_cms():
     return config, deps, faqs
 
 # --- ROTAS ADMINISTRATIVAS ---
-# --- ROTAS ADMINISTRATIVAS ---
 @app.route('/')
 def index():
     conn = sqlite3.connect(DB_NAME)
@@ -88,7 +86,6 @@ def index():
     clientes_lista = []
     for u in usuarios:
         id_usuario = u[0]
-        # Cruza as reservas do cliente com os detalhes da viagem
         compras = cursor.execute('''
             SELECT v.destino, v.data 
             FROM reservas r 
@@ -96,7 +93,6 @@ def index():
             WHERE r.id_usuario = ?
         ''', (id_usuario,)).fetchall()
         
-        # Cria um "pacote" com os dados do cliente + as compras dele
         clientes_lista.append({
             'nome': u[1],
             'email': u[2],
@@ -104,12 +100,32 @@ def index():
             'telefone': u[5],
             'compras': compras
         })
+
+    # --- MATEMÁTICA DO DASHBOARD ---
+    total_viagens = len(viagens)
+    total_clientes = len(usuarios)
+    total_reservas = cursor.execute("SELECT COUNT(*) FROM reservas").fetchone()[0]
+    
+    faturamento_db = cursor.execute('''
+        SELECT SUM(v.preco) 
+        FROM reservas r 
+        JOIN viagens v ON r.id_viagem = v.id
+    ''').fetchone()[0]
+    
+    faturamento = faturamento_db if faturamento_db else 0.0
+    faturamento_formatado = f"{faturamento:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    
+    stats = {
+        'viagens': total_viagens,
+        'clientes': total_clientes,
+        'reservas': total_reservas,
+        'faturamento': faturamento_formatado
+    }
         
     conn.close()
     config, deps, faqs = obter_dados_cms()
     
-    # Envia a nossa nova lista turbinada para o HTML
-    return render_template('index.html', lista=viagens, clientes=clientes_lista, conf=config, deps=deps, faqs=faqs)
+    return render_template('index.html', lista=viagens, clientes=clientes_lista, conf=config, deps=deps, faqs=faqs, stats=stats)
 
 @app.route('/cadastrar', methods=['POST'])
 def cadastrar():
@@ -146,7 +162,10 @@ def atualizar_viagem(id):
 def salvar_identidade():
     nome_agencia = request.form.get('nome_agencia')
     b1_link, b2_link = request.form.get('banner1_link'), request.form.get('banner2_link')
-    logo, b1_img, b2_img = salvar_imagem(request.files.get('logo')), salvar_imagem(request.files.get('banner1_img')), salvar_imagem(request.files.get('banner2_img'))
+    
+    logo = salvar_imagem(request.files.get('logo'))
+    b1_img = salvar_imagem(request.files.get('banner1_img'))
+    b2_img = salvar_imagem(request.files.get('banner2_img'))
 
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
@@ -211,7 +230,8 @@ def site_oficial():
     return render_template('site.html', lista=viagens, conf=config, deps=deps, faqs=faqs)
 
 @app.route('/cadastro')
-def tela_cadastro(): return render_template('cadastro.html')
+def tela_cadastro(): 
+    return render_template('cadastro.html')
 
 @app.route('/cadastrar_usuario', methods=['POST'])
 def cadastrar_usuario():
@@ -222,16 +242,20 @@ def cadastrar_usuario():
         conn.commit()
     except:
         return "<h1>Erro: Este e-mail já está em uso!</h1><a href='/cadastro'>Voltar</a>"
-    finally: conn.close()
+    finally: 
+        conn.close()
     return redirect('/login')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'GET': return render_template('login.html')
+    if request.method == 'GET': 
+        return render_template('login.html')
+    
     email, senha = request.form.get('email'), request.form.get('senha')
     conn = sqlite3.connect(DB_NAME)
     usuario = conn.cursor().execute("SELECT * FROM usuarios WHERE email = ? AND senha = ?", (email, senha)).fetchone()
     conn.close()
+    
     if usuario:
         session['usuario_id'] = usuario[0]
         session['usuario_nome'] = usuario[1]
@@ -301,7 +325,7 @@ def sucesso():
 
 @app.route('/falha')
 def falha():
-    return "<div style='text-align:center; margin-top:100px; font-family:sans-serif;'><h1>Pagamento Recusado ❌</h1><p>Houve um problema com a tua transação. Tenta novamente.</p><br><a href='/dashboard' style='background:#e74c3c; color:white; padding:10px 20px; text-decoration:none; border-radius:5px;'>Tentar Novamente</a></div>"
+    return "<div style='text-align:center; margin-top:100px; font-family:sans-serif;'><h1>Pagamento Recusado ❌</h1><p>Houve um problema com a tua transação. Tente novamente.</p><br><a href='/dashboard' style='background:#e74c3c; color:white; padding:10px 20px; text-decoration:none; border-radius:5px;'>Tentar Novamente</a></div>"
 
 @app.route('/pendente')
 def pendente():
@@ -314,4 +338,3 @@ def logout():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
